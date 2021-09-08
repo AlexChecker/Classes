@@ -19,13 +19,19 @@ namespace Classes
         }
         public char? Border(int x, int y)
         {
-            if (x == 0 || x == width-1 || y == 0 || y == height-1)
-            {
-                return '#';
-            }
+            //if (x == 0 || x == width-1 || y == 0 || y == height-1)
+            //{
+            //    return '#';
+            //}
+            if (x == 0 && y == 0) return '╔';
+            if ((x == 0 || x == width - 1) && y != 0 && y != height - 1) return '║';
+            if (x == width - 1 && y == 0) return '╗';
+            if (x == 0 && y == height - 1) return '╚';
+            if (x == width - 1 && y == height - 1) return '╝';
+            if ((y == 0 || y == height - 1) && x != 0 && x != width - 1) return '═';
             else
             {
-                return getline(x-1,y-1);
+                return getline(x - 1, y - 1);
             }
             return null;
         }
