@@ -8,7 +8,7 @@ namespace Classes
     {
         static void Main(string[] args)
         {
-            Xplore explorer = new Xplore(40,15);
+            Xplore explorer = new Xplore(60,25);
             explorer.Xplorer();
         }
 

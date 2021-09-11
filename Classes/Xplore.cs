@@ -82,12 +82,6 @@ namespace Classes
             else current.hilight++;
             current.DrawPanel();
         }
-        private string parse()
-        {
-            string result ="";
-            result = current.getHighlighted().Substring(current.ara[current.hilight + current.fo].ToString().LastIndexOf('.'));
-            return result;
-        }
 
         private void enter()
         {
@@ -99,7 +93,7 @@ namespace Classes
             }
             else if (!current.isFolder())
             {
-                Process.Start("notepad.exe",(string)current.ara[current.hilight + current.fo]);
+                Process.Start((string)current.ara[current.hilight + current.fo]);
 
             }
             else
