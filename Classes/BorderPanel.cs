@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Classes
 {
-    class InternalSpace : Panel
+    class BorderPanel : Panel
     {
 
-        public InternalSpace(int width,int height):base(width,height)
+        public BorderPanel(int width,int height):base(width,height)
         {
 
         }

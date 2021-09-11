@@ -5,134 +5,124 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections;
+using System.Diagnostics;
 
 namespace Classes
 {
-    class Xplore:StringWrite
+    class Xplore
     {
-        public Xplore(int width,int height):base(width,height)
+
+
+        private int width, height;
+        private KeyController keyController;
+        private ListPanel left, right;
+        private ListPanel current; //Choosen panel <tab>
+        private string path;
+
+        public Xplore(int w, int h)
         {
-        
+            this.width = w;
+            this.height = h;
+            this.keyController = new KeyController();
+            path = Directory.GetCurrentDirectory();
+            left = fileZ(path);
+            right = fileZ(path);
+            current = left;
+            setupListener();
+        }
+
+        private void setupListener()
+        {
+            keyController.addListener(new KeyListener(ConsoleKey.UpArrow, () =>
+            {
+                listUp();
+            }));
+            keyController.addListener(new KeyListener(ConsoleKey.DownArrow, () =>
+            {
+                listDown();
+            }));
+            keyController.addListener(new KeyListener(ConsoleKey.Enter, () =>
+            {
+                enter();
+            })); 
+            keyController.addListener(new KeyListener(ConsoleKey.Tab, () =>
+            {
+                if (current == right)
+                {
+                    current = left;
+                }
+                else
+                {
+                    current = right;
+                }
+            }));
+
+        }
+
+        private void listUp()
+        {
+            if (current.hilight == 0) current.hilight = current.ara.Count - 1;
+            else if (current.hilight == current.fo)
+            {
+                current.fo--;
+                current.hilight--;
+            }
+            else current.hilight--;
+            current.DrawPanel();
+        }
+
+        private void listDown()
+        {
+            if (current.hilight == current.ara.Count - 1) current.hilight = 0;
+            else if (current.hilight == current.getHeight() + current.fo)
+            {
+                current.fo++;
+                current.hilight++;
+            }
+            else current.hilight++;
+            current.DrawPanel();
+        }
+        private string parse()
+        {
+            string result ="";
+            result = current.getHighlighted().Substring(current.ara[current.hilight + current.fo].ToString().LastIndexOf('.'));
+            return result;
+        }
+
+        private void enter()
+        {
+            if (current.getHighlighted() == "..")
+            {
+                current.hilight = 0;
+                path = Directory.GetParent(path).FullName;
+                current.ara = updatedirs(path);
+            }
+            else if (!current.isFolder())
+            {
+                Process.Start("notepad.exe",(string)current.ara[current.hilight + current.fo]);
+
+            }
+            else
+            {
+                path = current.getHighlighted();
+                current.hilight = 0;
+                current.ara = updatedirs(path);
+            }
+            current.DrawPanel();
         }
 
         public void Xplorer()
         {
-            bool close = false;
-            bool fZ = false;
-            string path = Directory.GetCurrentDirectory();
-            StringWrite first = fileZ(path);
-            StringWrite second = fileZ(path);
-            second.ofx = width;
-            first.DrawPanel();
-            second.DrawPanel();
-            while (!close)
-            {
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                switch (key.Key)
-                {
-                    case ConsoleKey.UpArrow:
-                        if (!fZ)
-                        {
-                            if (first.hilight == 0) first.hilight = first.ara.Count - 1;
-                            else if (first.hilight == first.fo)
-                            {
-                                first.fo--;
-                                first.hilight--;
-                            }
-                            else first.hilight--;
-                            first.DrawPanel();
-                        }
-                        else
-                        {
-                            if (second.hilight == 0) second.hilight = second.ara.Count - 1;
-                            else if (second.hilight == second.fo)
-                            {
-                                second.fo--;
-                                second.hilight--;
-                            }
-                            else second.hilight--;
-                            second.DrawPanel();
-                        }
-                        break;
-                    case ConsoleKey.DownArrow:
-                        if (!fZ)
-                        {
-                            if (first.hilight == first.ara.Count - 1) first.hilight = 0;
-                            else if (first.hilight == first.getHeight() + first.fo)
-                            {
-                                first.fo++;
-                                first.hilight++;
-                            }
-                            else first.hilight++;
-                            first.DrawPanel();
-                        }
-                        else
-                        {
-                            if (second.hilight == second.ara.Count - 1) second.hilight = 0;
-                            else if (second.hilight == second.getHeight() + second.fo)
-                            {
-                                second.fo++;
-                                second.hilight++;
-                            }
-                            else second.hilight++;
-                            second.DrawPanel();
-                        }
-                        break;
-                    case ConsoleKey.Enter:
-                        if (!fZ)
-                        {
-                            if ((string)first.ara[first.hilight] == "..")
-                            {
-                                first.hilight = 0;
-                                path = Directory.GetParent(path).FullName;
-                                first.ara = updatedirs(path);
-                            }
-                            else
-                            {
-                                path = (string)first.ara[first.hilight];
-                                first.hilight = 0;
-                                first.ara = updatedirs(path);
-                            }
-                            first.DrawPanel();
-                        }
-                        else
-                        {
-                            if ((string)second.ara[second.hilight] == "..")
-                            {
-                                second.hilight = 0;
-                                path = Directory.GetParent(path).FullName;
-                                second.ara = updatedirs(path);
-                            }
-                            else
-                            { 
-                                path = (string)second.ara[second.hilight];
-                                second.hilight = 0;
-                                second.ara = updatedirs(path);
-                            }
-                            second.DrawPanel();
-                        }
-                        break;
-                    case ConsoleKey.Tab:
-                        fZ = !fZ;
-                        break;
-                }
-            }
-
+            path = Directory.GetCurrentDirectory();
+            left.ofx = width;
+            left.DrawPanel();
+            right.DrawPanel();
+            keyController.syncListen();
         }
-        public StringWrite fileZ(string path)
+        public ListPanel fileZ(string path)
         {
-            StringWrite fileManager = new StringWrite(width, height);
-            fileManager.ara.Clear();
-            fileManager.ara.Add("..");
-            fileManager.file = true;
-            foreach (string dir in Directory.GetDirectories(path))
-            {
-                fileManager.ara.Add(dir);
-            }
-            foreach (string dir in Directory.GetFiles(path))
-            {
-                fileManager.ara.Add(dir);
-            }
+            ListPanel fileManager = new ListPanel(width, height);
+            fileManager.ara = updatedirs(path);
             fileManager.DrawPanel();
             return fileManager;
         }
