@@ -93,7 +93,16 @@ namespace Classes
             }
             else if (!current.isFolder())
             {
-                Process.Start((string)current.ara[current.hilight + current.fo]);
+                string filepath = (string)current.ara[current.hilight + current.fo];
+                if (!filepath.Contains(".exe"))
+                {
+                    Process.Start("notepad.exe", filepath);
+                }
+                else
+                {
+                    Process.Start(filepath);
+                }
+                
 
             }
             else

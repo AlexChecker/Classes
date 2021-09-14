@@ -6,16 +6,22 @@ using System.Threading.Tasks;
 
 namespace Classes
 {
-    class Panel
+    class Panel : Drawable
     {
-        protected int width;
-        protected int height;
+        public int width;
+        public int height;
         public int ofx,ofy=0;
         public Panel(int width,int height)
         {
             this.width = width;
             this.height = height;
         }
+
+        public void draw()
+        {
+            DrawPanel();
+        }
+
         public void DrawPanel()
         {
             for (int y = 0; y < height; y++)
