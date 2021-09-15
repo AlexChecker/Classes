@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
@@ -14,49 +13,81 @@ namespace Classes
 
 
         private int width, height;
-        private KeyController keyController;
-        private ListPanel left, right;
-        private ListPanel current; //Choosen panel <tab>
+        private Windows windows;
+        private SelectPanel left, right;
+        private SelectPanel current; //Choosen panel <tab>
+        private Window leftw, rightw;
+        private Window currentw;
         private string path;
+
+        private InputWindow pane;
+        private int i = 0;
 
         public Xplore(int w, int h)
         {
             this.width = w;
             this.height = h;
-            this.keyController = new KeyController();
+            this.windows = new Windows();
             path = Directory.GetCurrentDirectory();
             left = fileZ(path);
             right = fileZ(path);
+            Window leftw = new Window(w, h, 0, 0, left);
+            Window rightw = new Window(w, h, w, 0, right);
+            this.leftw = leftw;
+            this.rightw = rightw;
+            windows.addWindow(leftw);
+            windows.addWindow(rightw);
+            setupListener(leftw.controller);
+            setupListener(rightw.controller);
+            InputWindow win = new InputWindow(32, 8, w / 2 + 9, h / 2 - 4);
+            this.pane = win;
+            setupListener(win.controller);
+            windows.addWindow(win);
+            windows.focused = leftw;
+            currentw = leftw;
+
             current = left;
-            setupListener();
         }
 
-        private void setupListener()
+        private void setupListener(KeyController controller)
         {
-            keyController.addListener(new KeyListener(ConsoleKey.UpArrow, () =>
+            controller.addListener(new KeyListener(ConsoleKey.UpArrow, () =>
             {
                 listUp();
             }));
-            keyController.addListener(new KeyListener(ConsoleKey.DownArrow, () =>
+            controller.addListener(new KeyListener(ConsoleKey.DownArrow, () =>
             {
                 listDown();
             }));
-            keyController.addListener(new KeyListener(ConsoleKey.Enter, () =>
+            controller.addListener(new KeyListener(ConsoleKey.Enter, () =>
             {
                 enter();
-            })); 
-            keyController.addListener(new KeyListener(ConsoleKey.Tab, () =>
+            }));
+            controller.addListener(new KeyListener(ConsoleKey.K, () =>
+            {
+                windows.focused = pane;
+                updateScreen();
+            }));
+            controller.addListener(new KeyListener(ConsoleKey.Tab, () =>
             {
                 if (current == right)
                 {
                     current = left;
+                    currentw = leftw;
                 }
                 else
                 {
                     current = right;
+                    currentw = rightw;
                 }
+                windows.focused = currentw;
             }));
 
+        }
+
+        public void updateScreen()
+        {
+            windows.draw();
         }
 
         private void listUp()
@@ -68,7 +99,7 @@ namespace Classes
                 current.hilight--;
             }
             else current.hilight--;
-            current.DrawPanel();
+            updateScreen();
         }
 
         private void listDown()
@@ -80,7 +111,7 @@ namespace Classes
                 current.hilight++;
             }
             else current.hilight++;
-            current.DrawPanel();
+            updateScreen();
         }
 
         private void enter()
@@ -94,13 +125,13 @@ namespace Classes
             else if (!current.isFolder())
             {
                 string filepath = (string)current.ara[current.hilight + current.fo];
-                if (!filepath.Contains(".exe"))
+                if (filepath.Contains(".exe"))
                 {
-                    Process.Start("notepad.exe", filepath);
+                    Process.Start(filepath);
                 }
                 else
                 {
-                    Process.Start(filepath);
+                    Process.Start("notepad.exe", filepath);
                 }
                 
 
@@ -111,22 +142,30 @@ namespace Classes
                 current.hilight = 0;
                 current.ara = updatedirs(path);
             }
-            current.DrawPanel();
+            updateScreen();
         }
 
         public void Xplorer()
         {
             path = Directory.GetCurrentDirectory();
             left.ofx = width;
-            left.DrawPanel();
-            right.DrawPanel();
-            keyController.syncListen();
+            updateScreen();
+            while (true)
+            {
+                Window focus = windows.focused;
+                if (focus != null)
+                {
+                    ConsoleKeyInfo info = Console.ReadKey(true);
+                    focus.process(info.Key);
+                    updateScreen();
+                }
+            }
         }
-        public ListPanel fileZ(string path)
+        public SelectPanel fileZ(string path)
         {
-            ListPanel fileManager = new ListPanel(width, height);
+            SelectPanel fileManager = new SelectPanel(width, height);
             fileManager.ara = updatedirs(path);
-            fileManager.DrawPanel();
+            updateScreen();
             return fileManager;
         }
         public static ArrayList updatedirs(string path)

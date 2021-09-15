@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace Classes
 {
-    class ListPanel : BorderPanel
+    class SelectPanel : BorderPanel
     {
         public ArrayList ara = new ArrayList();
         public bool file = false;
         public int hilight;
         public int fo=0;
-        public ListPanel(int width, int height) : base(width, height)
+        public SelectPanel(int width, int height) : base(width, height)
         {
 
         }
@@ -38,16 +37,8 @@ namespace Classes
             String l="";
             if (ara.Count > y+fo)
             {
-                
-                if ((ara[y + fo].ToString().IndexOf('\\') > 0 || ara[y + fo].ToString().IndexOf('/') > 0))
-                {
-                    
-                    l = ara[y + fo].ToString().Substring(ara[y+fo].ToString().LastIndexOf('\\'));
-                }
-                else
-                {
-                    l = (string)ara[y + fo];
-                }
+                string[] args = ((string)ara[y + fo]).Split('\\');
+                l = args[args.Length - 1];
                 if (l.Length > x)
                 {
                     if (y+fo == hilight )

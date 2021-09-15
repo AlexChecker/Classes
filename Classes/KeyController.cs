@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Collections;
 
 namespace Classes
@@ -11,6 +10,7 @@ namespace Classes
     {
 
         private ArrayList listeners = new ArrayList();
+        private ArrayList listenersOther = new ArrayList();
 
         public KeyListener getListener(ConsoleKey key)
         {
@@ -29,17 +29,34 @@ namespace Classes
             listeners.Add(listen);
         }
 
+        public void addListenerOther(Action<ConsoleKey> onType)
+        {
+            listenersOther.Add(onType);
+        }
+
+        public void processor(ConsoleKey key)
+        {
+            KeyListener sel = getListener(key);
+            if (sel != null)
+            {
+                sel.onClick();
+            }
+            else
+            {
+                foreach(Action<ConsoleKey> onType in listenersOther)
+                {
+                    onType.Invoke(key);
+                }
+            }
+        }
+
         public void syncListen()
         {
             Boolean close = false;
             while (!close)
             {
                 ConsoleKeyInfo key = Console.ReadKey(true);
-                KeyListener sel = getListener(key.Key);
-                if(sel != null)
-                {
-                    sel.onClick();
-                }
+                processor(key.Key);
             }
         }
     }

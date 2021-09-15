@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Classes
 {
@@ -33,7 +32,6 @@ namespace Classes
             {
                 return getline(x - 1, y - 1);
             }
-            return null;
         }
         
         public virtual char getline(int x,int y)
